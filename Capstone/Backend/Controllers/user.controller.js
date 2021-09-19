@@ -1,6 +1,14 @@
-// const jsonwebtoken = require('jsonwebtoken');
+const jsonwebtoken = require('jsonwebtoken');
 
 const userModel = require('../models/user.model');
+
+generateJwtToken = (_id) => {
+    jsonwebtoken.sign({
+        id: _id
+    }, process.env.JWT_SECRET_KEY, {
+        expiresIn: '1d'
+    });
+}
 
 signup = (req, res) => {
 
@@ -21,7 +29,7 @@ signup = (req, res) => {
             return res.status(500).json({
                 success: false,
                 message: "Some Error occurred while searching for existing email. Contact your administrator"
-            })
+            });
         }
 
         if (data) {
@@ -42,16 +50,27 @@ signup = (req, res) => {
         _user.save((error, user) => {
             if (error) {
                 console.log(error);
+
                 return res.status(500).json({
                     success: false,
                     message: "Some Error occurred while saving the user. Contact your administrator"
-                })
+                });
             }
+
+            // var token = jsonwebtoken.sign({
+            //     foo: 'bar'
+            // }, 'shhhhh');
+
+
             if (user) {
+                const token = generateJwtToken(user._id);
                 return res.json({
                     success: true,
                     message: "User has been successfully saved",
-                    data: user
+                    data: {
+                        user,
+                        token: token
+                    }
                 })
             }
         })
@@ -76,23 +95,27 @@ signin = (req, res) => {
             return res.status(500).json({
                 success: false,
                 message: "DB Error occurred. Contact your administrator"
-            })
+            });
         }
 
         if (data) {
 
             const isAuthenticated = data.authenticate(password);
             if (isAuthenticated) {
+
+                const token = generateJwtToken(data._id);
                 return res.json({
                     success: true,
                     message: "User Login Successfully",
-                    data: data
+                    data: {
+                        data,
+                        token: token
+                    }
                 })
 
-            }
-            else {
+            } else {
                 return res.json({
-                    success: true,
+                    success: false,
                     message: "User Login Failed. Bad Authentication"
                 })
             }
@@ -101,7 +124,7 @@ signin = (req, res) => {
                 success: false,
                 message: "User Email does not exist"
             })
-        }    
+        }
     })
 }
 

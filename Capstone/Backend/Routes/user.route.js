@@ -6,7 +6,16 @@ const {
     signin
 } = require('../Controllers/user.controller');
 
-router.post('/signup', signup);
-router.post('/signin', signin);
+const {
+    validateSignUpRequest,
+    validateSignInRequest,
+    isRequestCorrect
+} = require('../validators/user.validator')
+
+
+router.post('/signup', validateSignUpRequest, isRequestCorrect, signup);
+router.post('/signin', validateSignInRequest, isRequestCorrect, signin);
 
 module.exports = router;
+
+// validateSignUpRequest, isRequestCorrect,
