@@ -11,11 +11,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const userRoutes = require('./Routes/user.route')
+const indexRoutes = require('./Routes/index.route')
+app.use('/api', indexRoutes);
 
-app.use('/api', userRoutes);
-
-//Start server cell
+//Start Server Call
 app.listen(process.env.PORT, () => { 
     console.log(`Listening to http://localhost:${process.env.PORT}`);
 });
@@ -25,4 +24,11 @@ app.listen(process.env.PORT, () => {
 //      "firstname": "Mr",
 //      "lastname": "Patel",
 //      "password": "mrpatel"
+// }
+
+// {
+//     "email": "mrxyz9305@gmail.com",
+//     "firstname": "Mr",
+//     "lastname": "XYZ",
+//     "password": "mexyz123"
 // }
