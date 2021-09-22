@@ -4,13 +4,13 @@ const router = express.Router();
 const {
     signup, 
     signin
-} = require('../Controllers/user.controller');
+} = require('../Controllers/auth.controller');
 
 const {
     validateSignUpRequest,
     validateSignInRequest,
     isRequestCorrect
-} = require('../validators/user.validator')
+} = require('../validators/auth.validator')
 
 
 router.post('/signup', validateSignUpRequest, isRequestCorrect, signup);
