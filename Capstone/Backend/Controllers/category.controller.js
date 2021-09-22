@@ -28,7 +28,7 @@ addNewCategory = (req, res) => {
 
     const _category = new categoryModel(categoryInput);
     _category.save((error, category) => {
-        
+
         if (error) {
             console.log(error);
             return res.status(500).json({
@@ -47,7 +47,59 @@ addNewCategory = (req, res) => {
     })
 }
 
-getCategory = (req, res) => {
+getCategory = async (req, res) => {
+
+    // categoryModel.find({}).exec((error, category) => {
+    //     if (error) {
+    //         console.log(error);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: "DB Error occurred. Contact your administrator",
+    //             error: error
+    //         });
+    //     }
+
+    //     if (category) {
+    //         console.log(category);
+        
+    //         return res.status(200).json({
+    //             category
+    //         });
+    //     }
+    // });
+
+
+    try {
+        const category = await categoryModel.find({});
+
+        // const categoryTree = getcategoryTree(category);
+        return res.status(200).json({
+            category
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "DB Error occurred. Contact your administrator",
+            error: error
+        })
+    }
+}
+
+function createCategories(allCategories, id = null){
+
+    var categories = allCategories.filter(c => c.id === id); 
+
+    var arr = [];
+    for(var i = 0; i < categories.length; i++){
+        const element = categories[i];
+        var t = createCategories(allCategories, element._id);
+        arr.push(t);
+        return{
+            category: element,
+            subCategory: arr
+        }
+    }
 
 }
 
