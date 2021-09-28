@@ -1,22 +1,28 @@
 const mongoose = require('mongoose');
 
 const categorySchema = mongoose.Schema({
+
     name: {
-        type: 'string',
+        type: String,
         required: [true, "Please provide your Category Name"],
-        trim: true,
+        trim: true
     },
     slug: {
-        type: 'string',
+        type: String,
         required: [true, "Please provide your Category Slug"],
         trim: true,
-        unique: true
+        unique: true,
     },
     type: {
-        type: 'string',
+        type: String,
     },
     parentId: {
-        type: 'string',
+        type: String,
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
     }
 
 }, {

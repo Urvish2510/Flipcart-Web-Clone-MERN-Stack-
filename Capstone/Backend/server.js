@@ -20,15 +20,29 @@ app.listen(process.env.PORT, () => {
 });
 
 // {
-//     "email": "mrpatel9305@gmail.com",
-//      "firstname": "Mr",
-//      "lastname": "Patel",
-//      "password": "mrpatel"
-// }
-
-// {
 //     "email": "mrxyz9305@gmail.com",
 //     "firstname": "Mr",
 //     "lastname": "XYZ",
-//     "password": "mexyz123"
+//     "password": "mrxyz123"
+// }
+
+// {
+//     "email": "mrpatel9305@gmail.com",
+//     "firstname": "Mr",
+//     "lastname": "Patel",
+//     "password": "mrpatel123"
+// }
+
+// {
+//     "email": "mrdeveloper1234@gmail.com",
+//     "firstname": "Mr",
+//     "lastname": "Developer",
+//     "password": "mrdeveloper"
+// }
+
+// {
+//     "email": "mrjs1234@gmail.com",
+//     "firstname": "Mr",
+//     "lastname": "JS",
+//     "password": "I_am_JavaScript"
 // }

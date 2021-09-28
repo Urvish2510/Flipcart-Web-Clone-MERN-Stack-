@@ -1,12 +1,11 @@
-const userModel = require('../models/user.model');
 const {
     nanoid
 } = require('nanoid')
 
+const userModel = require('../../models/user.model');
 const {
     generateJwtToken
-} = require('../helpers/helper');
-
+} = require('../../helpers/helper');
 
 
 const signup = (req, res) => {
@@ -35,39 +34,37 @@ const signup = (req, res) => {
         if (data) {
             return res.json({
                 success: false,
-                message: "User Email Already Exists."
+                message: "Admin Email Already Exists."
             })
         }
 
 
-        const _user = new userModel({
+        const _admin = new userModel({
             email,
             firstname,
             lastname,
             password,
+            role: 'admin',
             username: nanoid(10),
         });
 
-        _user.save((error, user) => {
+        _admin.save((error, admin) => {
             if (error) {
                 console.log(error);
 
                 return res.status(500).json({
                     success: false,
-                    message: "Some Error occurred while saving the user. Contact your administrator"
+                    message: "Some Error occurred while saving the admin. Contact your administrator"
                 });
             }
-            if (user) {
+            if (admin) {
 
-                const token = generateJwtToken(user._id, user.role);
+                const token = generateJwtToken(admin._id, admin.role);
                 return res.json({
                     success: true,
-                    message: "User has been successfully saved",
+                    message: "Admin has been successfully saved",
                     data: {
-                        user: {
-                            fullname: user.fullname,
-                            email: user.email
-                        },
+                        admin,
                         token: token
                     }
                 })
@@ -96,7 +93,13 @@ const signin = (req, res) => {
             });
         }
 
-        if (data) {
+        if (data) { 
+            if (data.role != 'admin') {
+                return res.status(403).json({
+                    success: false,
+                    message: "Access Forbidden."
+                });
+            }
 
             const isAuthenticated = data.authenticate(password);
             if (isAuthenticated) {
@@ -104,7 +107,7 @@ const signin = (req, res) => {
                 const token = generateJwtToken(data._id, data.role);
                 return res.json({
                     success: true,
-                    message: "User Login successfully",
+                    message: "Admin Login successfully",
                     data: {
                         user: {
                             fullname: data.fullname,
@@ -117,14 +120,14 @@ const signin = (req, res) => {
             } else {
                 return res.json({
                     success: false,
-                    message: "User Login failed. Bad Authentication"
+                    message: "Admin Login failed. Bad Authentication"
                 })
             }
 
         } else {
             return res.json({
                 success: false,
-                message: "User Email Does not exist."
+                message: "Admin Email Does not exist."
             });
         }
     })

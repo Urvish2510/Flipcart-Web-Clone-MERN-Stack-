@@ -1,26 +1,24 @@
-const categoryModel = require('../Models/category.model');
-const slugify = require('slugify');
+const slugify = require('slugify')
+const {
+    nanoid
+} = require('nanoid')
 
-addNewCategory = (req, res) => {
+const categoryModel = require('../models/category.model');
+
+
+const addNewCategory = (req, res) => {
+
+    let slug = slugify(req.body.name, {
+        lower: true
+    }) + '-' + nanoid(8);
 
     const categoryInput = {
         name: req.body.name,
-        slug: slugify(req.body.name, {
-            lower: true
-        })
+        slug: slug
     };
 
-    console.log(categoryInput);
-
-    /**
-     * 
-     * @example
-     * categoryInput = {
-     *      name: Electronics Devices,
-     *      slug: 'electronics-devices'
-     * };
-     * 
-     */
+    categoryInput.createdBy = req.user.id;
+    
 
     if (req.body.parentId) {
         categoryInput.parentId = req.body.parentId;
@@ -38,72 +36,102 @@ addNewCategory = (req, res) => {
         }
 
         if (category) {
-            return res.json({
+            return res.status(201).json({
                 success: true,
-                message: "Category Successfully Saved",
-                date: category
+                message: "Category Saved successfully",
+                data: category
             })
         }
     })
 }
 
-getCategory = async (req, res) => {
 
-    // categoryModel.find({}).exec((error, category) => {
-    //     if (error) {
-    //         console.log(error);
-    //         return res.status(500).json({
-    //             success: false,
-    //             message: "DB Error occurred. Contact your administrator",
-    //             error: error
-    //         });
-    //     }
+/**
+ * easy
+ * Get the list
+ *   cate [{ed }, {md}, {samsun}, .....]
+ * 
+ * 
+ * intermediate
+ * Get the category tree...
+ * 
+ *   Electronic Devices 
+ *      - Mobile Device
+ *          - Samsung
+ *          - iPhone
+ *          - One Plus
+ *      - TVs
+ *          - Sony
+ *          - TCL
+ *          - blah blah blah
+ *  [{
+ *  name : ed ...
+ *  subcategorie : {
+ *          {name : mobile device.... , 
+ *           subcategorie :{
+ *                  {name : samsung, ...} , 
+ *                  {name : one plus}
+ *              }
+ *          },
+ *           {name : tvs.... , 
+ *           subcategorie :{
+ *                  {name : sony, ...} , 
+ *                  {name : tcl}
+ *              }
+ *          } 
+ *     }
+ * },
+ * {
+ *      name : Fashions, 
+ *      
+ * }]
+ * 
+ */
 
-    //     if (category) {
-    //         console.log(category);
-        
-    //         return res.status(200).json({
-    //             category
-    //         });
-    //     }
-    // });
-
+const getCategory = async (req, res) => {
 
     try {
-        const category = await categoryModel.find({});
-
-        // const categoryTree = getcategoryTree(category);
-        return res.status(200).json({
-            category
-        });
+        const category = await categoryModel.find({}, '_id name slug parentId type');
+        const resp = generateCategoryData(category);
+        return res.json({
+            "data": resp
+        })
     } catch (error) {
         console.log(error);
         return res.status(500).json({
             success: false,
-            message: "DB Error occurred. Contact your administrator",
+            message: `DB Error occurred. 
+            Contact your administrator`,
             error: error
-        })
+        });
     }
 }
 
-function createCategories(allCategories, id = null){
+const generateCategoryData = (allCategories, parentId = null) => {
+    const CategoryJSON = [];
+    let _parentId; //undefined
+    if (parentId != null)
+        _parentId = parentId;
 
-    var categories = allCategories.filter(c => c.id === id); 
+    let categories = allCategories.filter((cat) => cat.parentId == _parentId);
 
-    var arr = [];
-    for(var i = 0; i < categories.length; i++){
+    for (let i = 0; i < categories.length; i++) {
         const element = categories[i];
-        var t = createCategories(allCategories, element._id);
-        arr.push(t);
-        return{
-            category: element,
-            subCategory: arr
+        let categoryObj = {
+            _id: element._id,
+            name: element.name,
+            slug: element.slug,
+            type: element.type,
+            parentId: element.parentId,
+            "subCategory": generateCategoryData(allCategories, element._id)
         }
+        CategoryJSON.push(categoryObj);
     }
-
+    return CategoryJSON;
 }
+
 
 module.exports = {
     addNewCategory,
     getCategory
-};
+}

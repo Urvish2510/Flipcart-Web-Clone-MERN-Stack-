@@ -1,6 +1,22 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+
+/**
+ * 
+ * User Schema 
+ *  
+ * @attributes
+ *  firstname
+ *  lastname
+ *  email
+ *  contact_number
+ *  hash_password
+ *  username
+ *  role/type
+ * 
+ */
+
 const userSchema = mongoose.Schema({
     firstname: {
         type: String,
@@ -12,7 +28,7 @@ const userSchema = mongoose.Schema({
     lastname: {
         type: String,
         required: [true, "Please provide your LastName"],
-        trim: true, //Remove spaces after and before the word
+        trim: true,
         min: 3,
         max: 20
     },
@@ -20,20 +36,20 @@ const userSchema = mongoose.Schema({
         type: String,
         required: [true, "Please provide your email"],
         trim: true,
-        unique: true,    //Only 1 people use that
+        unique: true,
         lowercase: true
     },
     username: {
         type: String,
         required: [true, "Please provide your Username"],
         trim: true,
-        unique: true,    //Only 1 people use that
+        unique: true,
         lowercase: true,
         index: true
     },
     role: {
         type: String,
-        enum: ["user", "admin", "super-admin"], // emun means role will take either of this values only. No other values are taken by role. 
+        enum: ["user", "admin", "super-admin"],
         default: "user"
     },
     contact_number: {
@@ -41,14 +57,37 @@ const userSchema = mongoose.Schema({
     },
     hash_password: {
         type: String,
-        required: [true, "Please provide your Password"]
-    },
+        required: [true, "Please provide your Password"],
+    }
 }, {
-    timestamps: true // It will tell us when was the collections created and when updated last time.
+    timestamps: true
 })
 
-userSchema.virtual('password').set( function (password) {
-    this.hash_password = bcrypt.hashSync(password, 12);
+
+/**
+ * Virtuals are properties not stored in the database.
+ * They are only logically stored to perform computations on the document fields.
+ *
+ */
+
+/**
+ * 
+ *    client --> node server  [ server.js <--> route <--> controllers <--> model, save data to db   ]
+ *    
+ *    sending data to db , it will check for the virtuals
+ * 
+ * 
+ *    what will be the scope of the 'this' keyword? what will it contain / refer to ?
+ * 
+ * 
+ *    anonymous functions 
+ *    arrow functions -> the hash_password property of the const variable userSchema will be overwritten
+ *    general functions
+ */
+
+
+userSchema.virtual('password').set(function (password) {
+    this.hash_password = bcrypt.hashSync(password, 12)
 })
 
 userSchema.virtual('fullname').get(function () {
@@ -58,10 +97,19 @@ userSchema.virtual('fullname').get(function () {
     this.lastname = fullname.split(' ')[1];
 })
 
+
+/***
+ * 
+ * Methods / Functions that are generic and assoicated to a particular Model 
+ * 
+ */
+
 userSchema.methods = {
-    authenticate: function (password){
-        return bcrypt.compareSync(password, this.hash_password);
+
+    authenticate: function (password) {
+        return bcrypt.compareSync(password, this.hash_password)
     }
+
 }
 
 module.exports = mongoose.model('User', userSchema);
